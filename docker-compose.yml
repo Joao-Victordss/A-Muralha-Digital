@@ -1,0 +1,41 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: muralha-nginx
+    volumes:
+      - ./nginx/html:/usr/share/nginx/html:ro
+    expose:
+      - "80"
+    networks:
+      muralha:
+        aliases:
+          - portal.local
+
+  ftp:
+    build:
+      context: ./ftp
+    container_name: muralha-ftp
+    expose:
+      - "21"
+      - "21100-21110"
+    networks:
+      muralha:
+        aliases:
+          - ftp.local
+
+  squid:
+    build:
+      context: ./squid
+    container_name: muralha-squid
+    depends_on:
+      - nginx
+      - ftp
+    ports:
+      - "3128:3128"
+      - "2121:2121"
+    networks:
+      muralha:
+
+networks:
+  muralha:
+    name: muralha-digital

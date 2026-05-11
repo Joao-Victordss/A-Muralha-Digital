@@ -1,0 +1,5 @@
+.agents/
+.codex/
+.git/
+*.log
+tmp/
