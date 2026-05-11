@@ -11,17 +11,28 @@ Ambiente Docker para testar filtros com Nginx, Squid e FTP.
 ## Subir o ambiente
 
 ```bash
-docker compose up --build
+docker compose up -d --no-build
+docker compose ps
 ```
 
 Somente o Squid fica exposto no host. O Nginx e o FTP ficam internos na rede Docker para evitar acesso direto sem filtro.
+
+Se precisar reconstruir as imagens:
+
+```bash
+docker compose up -d --build
+```
+
+Importante: desative temporariamente o proxy do Windows antes de usar `--build`. Se o Windows/Docker Desktop estiver configurado para usar `localhost:3128` e o Squid ainda nao estiver rodando, o Docker pode tentar baixar imagens pelo proprio Squid e falhar.
 
 ## Tarefa A: Nginx + Squid
 
 Configure o Chrome/Windows para usar proxy HTTP:
 
-- Host: IP da WSL2 ou `localhost`, se estiver acessando pela propria maquina.
+- Host: `localhost` ou o IP da WSL2.
 - Porta: `3128`.
+
+No campo de proxy do Windows, use apenas `localhost`, sem `http://`.
 
 URLs de teste pelo proxy:
 
@@ -53,13 +64,47 @@ docker compose exec squid tail -f /var/log/squid/access.log
 
 ## Tarefa B: FTP + Squid
 
-O Squid tambem escuta como proxy FTP nativo na porta `2121`. No FileZilla:
+O Squid tambem escuta como proxy FTP nativo na porta `2121`. Para testar sem FileZilla, use `telnet`:
 
-- Abra `Editar > Configuracoes > FTP > Proxy FTP`.
-- Tipo de proxy: `USER@HOST`.
-- Proxy host: IP da WSL2 ou `localhost`.
-- Proxy port: `2121`.
-- Ao conectar, use host `ftp.local`, usuario `student`, senha `student`.
+```bash
+telnet localhost 2121
+```
+
+Login FTP pelo Squid:
+
+```txt
+USER student@ftp.local
+PASS student
+PWD
+QUIT
+```
+
+Download de `.txt` bloqueado:
+
+```txt
+USER student@ftp.local
+PASS student
+PASV
+RETR bloqueado.txt
+QUIT
+```
+
+Upload de `.pdf` bloqueado:
+
+```txt
+USER student@ftp.local
+PASS student
+PASV
+STOR upload/teste.pdf
+QUIT
+```
+
+Quando o Squid bloquear, a resposta esperada e:
+
+```txt
+451-ERR_ACCESS_DENIED
+451 Forbidden
+```
 
 Arquivos iniciais no FTP:
 
@@ -79,7 +124,33 @@ Com o ambiente rodando:
 ./tests/test-proxy.sh
 ```
 
-Os testes usam `ftp://` passando pelo proxy HTTP do Squid em `3128`. Eles nao substituem o teste com Chrome/FileZilla, mas validam rapidamente as ACLs principais.
+Resultado esperado:
+
+```txt
+Resumo: 9 OK, 0 erro(s)
+```
+
+Os testes usam `ftp://` passando pelo proxy HTTP do Squid em `3128`. Eles validam rapidamente as ACLs principais.
+
+## Comandos uteis
+
+Ver logs do Squid:
+
+```bash
+docker compose logs -f squid
+```
+
+Ver access log do Squid:
+
+```bash
+docker compose exec squid tail -f /var/log/squid/access.log
+```
+
+Parar o ambiente:
+
+```bash
+docker compose down
+```
 
 ## Referencias usadas
 
