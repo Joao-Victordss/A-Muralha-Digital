@@ -27,6 +27,7 @@ services:
     build:
       context: ./squid
     container_name: muralha-squid
+    restart: unless-stopped
     depends_on:
       - nginx
       - ftp
