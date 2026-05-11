@@ -65,19 +65,19 @@ printf 'MD permitido\n' > "$tmp_dir/permitido-upload.md"
 
 check_command_fails \
   'upload PDF' \
-  curl -sS -x "$proxy_http" -T "$tmp_dir/bloqueado.pdf" 'ftp://student:student@ftp.local/upload/bloqueado.pdf'
+  curl --fail-with-body -sS -x "$proxy_http" -T "$tmp_dir/bloqueado.pdf" 'ftp://student:student@ftp.local/upload/bloqueado.pdf'
 
 check_command_succeeds \
   'upload MD' \
-  curl -sS -x "$proxy_http" -T "$tmp_dir/permitido-upload.md" 'ftp://student:student@ftp.local/upload/permitido-upload.md'
+  curl --fail-with-body -sS -x "$proxy_http" -T "$tmp_dir/permitido-upload.md" 'ftp://student:student@ftp.local/upload/permitido-upload.md'
 
 check_command_fails \
   'download TXT' \
-  curl -sS -x "$proxy_http" 'ftp://student:student@ftp.local/bloqueado.txt'
+  curl --fail-with-body -sS -x "$proxy_http" 'ftp://student:student@ftp.local/bloqueado.txt'
 
 check_command_succeeds \
   'download MD' \
-  curl -sS -x "$proxy_http" 'ftp://student:student@ftp.local/permitido.md'
+  curl --fail-with-body -sS -x "$proxy_http" 'ftp://student:student@ftp.local/permitido.md'
 
 printf '\nResumo: %s OK, %s erro(s)\n' "$pass_count" "$fail_count"
 [[ "$fail_count" -eq 0 ]]

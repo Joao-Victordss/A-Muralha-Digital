@@ -3,7 +3,7 @@ FROM debian:bookworm-slim
 RUN apt-get update \
     && apt-get install -y --no-install-recommends vsftpd \
     && rm -rf /var/lib/apt/lists/* \
-    && useradd -m -d /srv/ftp/student -s /usr/sbin/nologin student \
+    && useradd -m -d /srv/ftp/student -s /bin/sh student \
     && echo "student:student" | chpasswd
 
 COPY vsftpd.conf /etc/vsftpd.conf

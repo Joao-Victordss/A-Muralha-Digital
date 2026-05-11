@@ -45,10 +45,10 @@ Depois reinicie o Squid:
 docker compose restart squid
 ```
 
-Para descobrir o IP que o Squid esta enxergando, acompanhe os logs enquanto faz uma requisicao pelo proxy:
+Para descobrir o IP que o Squid esta enxergando, acompanhe o access log enquanto faz uma requisicao pelo proxy:
 
 ```bash
-docker compose logs -f squid
+docker compose exec squid tail -f /var/log/squid/access.log
 ```
 
 ## Tarefa B: FTP + Squid
